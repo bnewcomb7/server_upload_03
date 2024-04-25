@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DataTables with JSON from Text File</title>
+    <!-- Include DataTables CSS -->
+    <link href="https://cdn.datatables.net/v/dt/dt-2.0.5/datatables.min.css" rel="stylesheet">
+</head>
+<body>
+    <table id="dataTable" class="display">
+        <thead>
+            <tr>
+                <th>new_filename</th>
+                <th>original_filename</th>
+                <th>tool</th>
+                <th>date_time</th>
+                <th>size_bytes</th>
+                <th>path_server</th>
+                <th>original_filepath</th>
+                <th>original_fileext</th>
+                <th>timestamp</th>
+                <th>IP</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include DataTables JS -->
+    <script src="https://cdn.datatables.net/v/dt/dt-2.0.5/datatables.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Read the text file
+            $.ajax({
+                url: 'public/fname_key.txt',
+                dataType: 'text',
+                success: function(data) {
+                    // Remove last comma
+                    data = '[' + data.slice(0, -2) + ']';
+                    // Parse the data into JSON
+                    var jsonData = JSON.parse(data);
+                    // Initialize DataTables
+                    $('#dataTable').DataTable({
+                        data: jsonData,
+                        columns: [
+                            { data: 'new_filename' },
+                            { data: 'original_filename' },
+                            { data: 'tool' },
+                            { data: 'date_time' },
+                            { data: 'size_bytes' },
+                            { data: 'path_server' },
+                            { data: 'original_filepath' },
+                            { data: 'original_fileext' },
+                            { data: 'timestamp' },
+                            { data: 'IP' }
+                        ]
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+{
+    "new_filename": "2024-04-25_18-07-37_aa_file.csv.txt",
+    "original_filename": "aa_file.csv",
+    "tool": "MLA_test",
+    "date_time": "2024-04-25_18-07-37",
+    "size_bytes": 7,
+    "path_server": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/server_upload_3/http:/localhost:3000/upload/2024-04-25_18-07-37_aa_file.csv.txt",
+    "original_filepath": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs/aa_file.csv",
+    "original_fileext": ".csv",
+    "timestamp": 1714082857791,
+    "IP": "::1",
+    "req_headers": {
+        "content-type": "multipart/form-data;boundary=--------------------------611332310160050742989023",
+        "accept": "*/*",
+        "content-length": "240",
+        "user-agent": "node-fetch/1.0 (+https://github.com/bitinn/node-fetch)",
+        "accept-encoding": "gzip,deflate",
+        "host": "localhost:3000",
+        "connection": "keep-alive"
+    }
+},
+{
+    "new_filename": "2024-04-25_18-07-51_aa_file.csv.txt",
+    "original_filename": "aa_file.csv",
+    "tool": "MLA_test",
+    "date_time": "2024-04-25_18-07-51",
+    "size_bytes": 7,
+    "path_server": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/server_upload_3/http:/localhost:3000/upload/2024-04-25_18-07-51_aa_file.csv.txt",
+    "original_filepath": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs/aa_file.csv",
+    "original_fileext": ".csv",
+    "timestamp": 1714082871750,
+    "IP": "::1",
+    "req_headers": {
+        "content-type": "multipart/form-data;boundary=--------------------------302227865291037947939631",
+        "accept": "*/*",
+        "content-length": "240",
+        "user-agent": "node-fetch/1.0 (+https://github.com/bitinn/node-fetch)",
+        "accept-encoding": "gzip,deflate",
+        "host": "localhost:3000",
+        "connection": "keep-alive"
+    }
+},
+{
+    "new_filename": "2024-04-25_18-16-28_aa_file.txt.txt",
+    "original_filename": "aa_file.txt",
+    "tool": "MLA_test",
+    "date_time": "2024-04-25_18-16-28",
+    "size_bytes": 21,
+    "path_server": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/server_upload_3/http:/localhost:3000/upload/2024-04-25_18-16-28_aa_file.txt.txt",
+    "original_filepath": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs/aa_file.txt",
+    "original_fileext": ".txt",
+    "timestamp": 1714083388339,
+    "IP": "::1",
+    "req_headers": {
+        "content-type": "multipart/form-data;boundary=--------------------------005946431944722333711479",
+        "accept": "*/*",
+        "content-length": "254",
+        "user-agent": "node-fetch/1.0 (+https://github.com/bitinn/node-fetch)",
+        "accept-encoding": "gzip,deflate",
+        "host": "localhost:3000",
+        "connection": "keep-alive"
+    }
+},
