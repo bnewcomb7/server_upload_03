@@ -2,10 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        p {
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <a href="/table">File table</a>
+    <div class="container">
+        <h1>Welcome to Server File Upload</h1>
+        <p>This project allows you to automate file uploads to a server using Node JS. The details of uploaded files 
+          are organized in a table.
+        </p>
+        <p>Click below to view the file table:</p>
+        <a href="/table" class="button">View File Table</a>
+    </div>
 </body>
 </html>
-

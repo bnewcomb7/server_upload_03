@@ -124,3 +124,87 @@
         "connection": "keep-alive"
     }
 },
+{
+    "new_filename": "2024-04-26_09-59-31_ab_file.txt.txt",
+    "original_filename": "ab_file.txt",
+    "tool": "MLA_test",
+    "date_time": "2024-04-26_09-59-31",
+    "size_bytes": 16,
+    "path_server": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/server_upload_3/http:/localhost:3000/upload/2024-04-26_09-59-31_ab_file.txt.txt",
+    "original_filepath": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs/ab_file.txt",
+    "original_fileext": ".txt",
+    "timestamp": 1714139971120,
+    "IP": "::1",
+    "req_headers": {
+        "content-type": "multipart/form-data;boundary=--------------------------753312344775199819853286",
+        "accept": "*/*",
+        "content-length": "249",
+        "user-agent": "node-fetch/1.0 (+https://github.com/bitinn/node-fetch)",
+        "accept-encoding": "gzip,deflate",
+        "host": "localhost:3000",
+        "connection": "keep-alive"
+    }
+},
+{
+    "new_filename": "2024-04-26_10-02-28_ab_file.txt.txt",
+    "original_filename": "ab_file.txt",
+    "tool": "MLA_test",
+    "date_time": "2024-04-26_10-02-28",
+    "size_bytes": 16,
+    "path_server": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/server_upload_3/http:/localhost:3000/upload/2024-04-26_10-02-28_ab_file.txt.txt",
+    "original_filepath": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs/ab_file.txt",
+    "original_fileext": ".txt",
+    "timestamp": 1714140148883,
+    "IP": "::1",
+    "req_headers": {
+        "content-type": "multipart/form-data;boundary=--------------------------979052586825973138574300",
+        "accept": "*/*",
+        "content-length": "249",
+        "user-agent": "node-fetch/1.0 (+https://github.com/bitinn/node-fetch)",
+        "accept-encoding": "gzip,deflate",
+        "host": "localhost:3000",
+        "connection": "keep-alive"
+    }
+},
+{
+    "new_filename": "2024-04-26_10-04-54_ab_file.txt.txt",
+    "original_filename": "ab_file.txt",
+    "tool": "MLA_test",
+    "date_time": "2024-04-26_10-04-54",
+    "size_bytes": 16,
+    "path_server": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/server_upload_3/http:/localhost:3000/upload/2024-04-26_10-04-54_ab_file.txt.txt",
+    "original_filepath": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs/ab_file.txt",
+    "original_fileext": ".txt",
+    "timestamp": 1714140294681,
+    "IP": "::1",
+    "req_headers": {
+        "content-type": "multipart/form-data;boundary=--------------------------101662440687515612957203",
+        "accept": "*/*",
+        "content-length": "249",
+        "user-agent": "node-fetch/1.0 (+https://github.com/bitinn/node-fetch)",
+        "accept-encoding": "gzip,deflate",
+        "host": "localhost:3000",
+        "connection": "keep-alive"
+    }
+},
+{
+    "new_filename": "2024-04-26_10-09-29_ab_file.txt.txt",
+    "original_filename": "ab_file.txt",
+    "tool": "MLA_test",
+    "date_time": "2024-04-26_10-09-29",
+    "size_bytes": 16,
+    "path_server": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/server_upload_3/http:/localhost:3000/upload/2024-04-26_10-09-29_ab_file.txt.txt",
+    "original_filepath": "/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs/ab_file.txt",
+    "original_fileext": ".txt",
+    "timestamp": 1714140569399,
+    "IP": "::1",
+    "req_headers": {
+        "content-type": "multipart/form-data;boundary=--------------------------838498250889134832604741",
+        "accept": "*/*",
+        "content-length": "249",
+        "user-agent": "node-fetch/1.0 (+https://github.com/bitinn/node-fetch)",
+        "accept-encoding": "gzip,deflate",
+        "host": "localhost:3000",
+        "connection": "keep-alive"
+    }
+},

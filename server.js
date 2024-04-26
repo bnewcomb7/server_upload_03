@@ -14,6 +14,9 @@ const app = express();
 app.use('/public', express.static('public'));
 app.use('/public', serveIndex('public'));
 
+// app.use('/upload', express.static('upload')); // Serve files from the upload directory
+// app.use('/upload', serveIndex('upload'));
+
 app.get('/index', (req, res) => {
     res.sendFile(path.join(__dirname, 'pages', 'index.html'));
 });
@@ -36,9 +39,6 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
     next();
 });
-
-// app.use(express.urlencoded({ extended: true }));
-// app.use(express.static('/upload')); // Serve files from the upload directory
 
 // Directories
 const uploadDirectory = 'http://localhost:3000/upload'; // Server upload directory
@@ -80,10 +80,10 @@ let addonData = {};
 initialized = false;
 
 if (!fs.existsSync(uploadDirectory)) {
-    fs.mkdirSync(uploadDirectory, { recursive: true });
+    console.log(`Warning: Need to create or change upload directory. ${uploadDirectory}`);
 }
 if (!fs.existsSync(targetDirectory)) {
-    fs.mkdirSync(targetDirectory, { recursive: true });
+    console.log(`Warning: Need to create or change target directory. ${targetDirectory}`);
 }
 
 // Check for changes in the target directory
