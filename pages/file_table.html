@@ -6,20 +6,22 @@
     <title>File Name Key Table</title>
     <!-- Include DataTables CSS -->
     <link href="https://cdn.datatables.net/v/dt/dt-2.0.5/datatables.min.css" rel="stylesheet">
+    <!-- Include ColReorder CSS -->
+    <link href="https://cdn.datatables.net/colreorder/2.0.1/css/colReorder.foundation.min.css" rel="stylesheet">
 </head>
 <body>
     <table id="dataTable" class="display">
         <thead>
             <tr>
-                <th>new_filename</th>
-                <th>original_filename</th>
-                <th>tool</th>
-                <th>date_time</th>
-                <th>size_bytes</th>
-                <th>path_server</th>
-                <th>original_filepath</th>
-                <th>original_fileext</th>
-                <th>timestamp</th>
+                <th>New Filename</th>
+                <th>Original Filename</th>
+                <th>Tool</th>
+                <th>Date and Time</th>
+                <th>Size (bytes)</th>
+                <th>Path on Server</th>
+                <th>Original Filepath</th>
+                <th>Original Filetype</th>
+                <th>Timestamp</th>
                 <th>IP</th>
             </tr>
         </thead>
@@ -28,9 +30,11 @@
     </table>
 
     <!-- Include jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <!-- Include DataTables JS -->
-    <script src="https://cdn.datatables.net/v/dt/dt-2.0.5/datatables.min.js"></script>
+    <script src="https://cdn.datatables.net/2.0.5/js/dataTables.js"></script>
+    <!-- Include ColReorder JS -->
+    <script src="https://cdn.datatables.net/colreorder/2.0.1/js/ColReorder.js"></script>
     
     <script>
         $(document).ready(function() {
@@ -43,7 +47,7 @@
                     data = '[' + data.slice(0, -2) + ']';
                     // Parse the data into JSON
                     var jsonData = JSON.parse(data);
-                    // Initialize DataTables
+                    // Initialize DataTables with ColReorder
                     $('#dataTable').DataTable({
                         data: jsonData,
                         columns: [
@@ -57,7 +61,8 @@
                             { data: 'original_fileext' },
                             { data: 'timestamp' },
                             { data: 'IP' }
-                        ]
+                        ],
+                        colReorder: true // Enable ColReorder
                     });
                 }
             });
