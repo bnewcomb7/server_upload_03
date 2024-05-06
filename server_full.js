@@ -9,26 +9,25 @@ const formidable = require('formidable');
 const moment = require('moment');
 require('moment-timezone/builds/moment-timezone-with-data');
 
-const port = 2000;
+const port = 3000;
 const app = express();
-app.use(express.json());
-// app.use('/public', express.static('public'));
-// app.use('/public', serveIndex('public'));
+app.use('/public', express.static('public'));
+app.use('/public', serveIndex('public'));
 
 // app.use('/upload', express.static('upload')); // Serve files from the upload directory
 // app.use('/upload', serveIndex('upload'));
 
-// app.get('/index', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'pages', 'index.html'));
-// });
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(__dirname, 'pages', 'index.html'));
+});
 
-// app.get('/fname_key', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'pages', 'fname_key.html'));
-// });
+app.get('/fname_key', (req, res) => {
+    res.sendFile(path.join(__dirname, 'pages', 'fname_key.html'));
+});
 
-// app.get('/table', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'pages', 'file_table.html'));
-// });
+app.get('/table', (req, res) => {
+    res.sendFile(path.join(__dirname, 'pages', 'file_table.html'));
+});
 
 // Parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
@@ -42,7 +41,7 @@ app.use((req, res, next) => {
 });
 
 // Directories
-const uploadDirectory = `http://10.19.0.246:${port}/upload`; // Server upload directory
+const uploadDirectory = 'http://localhost:3000/upload'; // Server upload directory
 const targetDirectory = '/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs'; // Simulated target directory
 let fileNameKeyPath = path.join(__dirname, 'public', 'fname_key.txt'); // Where to store key to file data
 
@@ -175,7 +174,6 @@ async function uploadFile(filePath, uploadUrl, fileName, addonData) {
         }
         
         formData.append('file', fileBuffer, fileName);
-        formData.append('addonData', '[' + JSON.stringify(addonData) + ']');
 
         // Perform the fetch request to upload the file
         const response = await fetch(uploadUrl, {
@@ -194,88 +192,89 @@ async function uploadFile(filePath, uploadUrl, fileName, addonData) {
     }
 }
 
-// async function appendFileNameKey() {
-//     addonData_reorder = {
-//         new_filename: addonData.new_filename,
-//         original_filename: addonData.original_filename,
-//         tool: addonData.tool,
-//         date_time: addonData.date_time,
-//         size_bytes: addonData.size_bytes,
-//         path_server: addonData.path_server,
-//         original_filepath: addonData.original_filepath,
-//         original_fileext: addonData.original_fileext,
-//         timestamp: addonData.timestamp,
-//         IP: addonData.IP,
-//         req_headers: addonData.req_headers
-//     }
-//     try {
-//         var file_key_text = ",\n" + JSON.stringify(addonData_reorder, null, 4);
-//         fs.appendFileSync(fileNameKeyPath, file_key_text);
-//         // console.log('The key data was appended to file!');
-//       } catch (err) {
-//         console.log(err)
-//         console.log('Data NOT appended.')
-//       }
-// }
+async function appendFileNameKey() {
+    addonData_reorder = {
+        new_filename: addonData.new_filename,
+        original_filename: addonData.original_filename,
+        tool: addonData.tool,
+        date_time: addonData.date_time,
+        size_bytes: addonData.size_bytes,
+        path_server: addonData.path_server,
+        original_filepath: addonData.original_filepath,
+        original_fileext: addonData.original_fileext,
+        timestamp: addonData.timestamp,
+        IP: addonData.IP,
+        req_headers: addonData.req_headers
+    }
+    try {
+        var file_key_text = JSON.stringify(addonData_reorder, null, 4) + ',\n';
+        fs.appendFileSync(fileNameKeyPath, file_key_text);
+        // console.log('The key data was appended to file!');
+      } catch (err) {
+        console.log(err)
+        console.log('Data NOT appended.')
+      }
+}
 
-// // POST route for handling file uploads
-// app.post('/upload', (req, res) => {
-//     const form = new formidable.IncomingForm({
-//         uploadDir: uploadDirectory,
-//         keepExtensions: true,
-//         keepFilenames: true,
-//         filename: function (name, ext, part) {
-//             // Use the original filename
-//             return part.originalFilename;
-//         }
-//     })
+// POST route for handling file uploads
+app.post('/upload', (req, res) => {
+    const form = new formidable.IncomingForm({
+        uploadDir: uploadDirectory,
+        keepExtensions: true,
+        keepFilenames: true,
+        filename: function (name, ext, part) {
+            // Use the original filename
+            return part.originalFilename;
+        }
+    })
 
-//     form.parse(req, (err, fields, files) => {
-//         if (err) {
-//             console.error('Error processing upload:', err);
-//             return res.status(500).send('An error occurred during the upload.');
-//         }
-//         // Update addonData
-//         addonData.new_filename = files.file[0].newFilename;
-//         addonData.path_server = files.file[0].filepath;
-//         addonData.size_bytes = files.file[0].size;
-//         addonData.IP = req.ip;
-//         addonData.req_headers = req.headers;
+    form.parse(req, (err, fields, files) => {
+        if (err) {
+            console.error('Error processing upload:', err);
+            return res.status(500).send('An error occurred during the upload.');
+        }
+        // Update addonData
+        addonData.new_filename = files.file[0].newFilename;
+        addonData.path_server = files.file[0].filepath;
+        addonData.size_bytes = files.file[0].size;
+        addonData.IP = req.ip;
+        addonData.req_headers = req.headers;
         
-//         appendFileNameKey();
-//         res.status(200).send('File uploaded successfully.');
-//     });
-// });
+        appendFileNameKey();
+        res.status(200).send('File uploaded successfully.');
+    });
+});
 
-// // GET route for displaying uploaded files
-// app.get('/', (req, res) => {
-//     fs.readdir(uploadDirectory, (err, files) => {
-//         if (err) {
-//             console.error('Failed to list upload directory:', err);
-//             return res.sendStatus(500);
-//         }
+// GET route for displaying uploaded files
+app.get('/', (req, res) => {
+    fs.readdir(uploadDirectory, (err, files) => {
+        if (err) {
+            console.error('Failed to list upload directory:', err);
+            return res.sendStatus(500);
+        }
 
-//         let fileLinks = files.map(file => `<li>${file}</li>`).join('');
-//         res.send(`
-//             <h2>Uploaded Files</h2>
-//             <ul>${fileLinks}</ul>
-//         `);
-//     });
-// });
+        let fileLinks = files.map(file => `<li>${file}</li>`).join('');
+        res.send(`
+            <h2>Uploaded Files</h2>
+            <ul>${fileLinks}</ul>
+        `);
+    });
+});
 
-// app.get('/upload', (req, res) => {
-//     // Handle GET requests to /upload route
-//     res.send('GET request to /upload endpoint.');
-// });
+app.get('/upload', (req, res) => {
+    // Handle GET requests to /upload route
+    res.send('GET request to /upload endpoint.');
+});
 
 // Start the server
+app.listen(port, () => {
+    // Call checkForChanges to initialize previousFiles with the files in the target directory
+    checkForChanges();
 
-// Call checkForChanges to initialize previousFiles with the files in the target directory
-checkForChanges();
+    // Set intervals for checking changes and uploading files
+    setInterval(checkForChanges, options.checkInterval);
+    setInterval(uploadFromTarget, options.uploadInterval);
 
-// Set intervals for checking changes and uploading files
-setInterval(checkForChanges, options.checkInterval);
-setInterval(uploadFromTarget, options.uploadInterval);
-
-console.log(`Server running at http://http://10.19.0.246:2000:${port}`);
-console.log('Monitoring files saved to ' + targetDirectory + '\n');
+    console.log(`Server running at http://localhost:${port}`);
+    console.log('Monitoring files saved to ' + targetDirectory + '\n');
+});
