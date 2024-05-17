@@ -72,10 +72,31 @@ function initializeOptions(userOptions) {
 // Initialize options
 const options = initializeOptions(userInputOptions);
 
-let previousFiles = [];
-let changedFiles = [];
-let addonData = {};
-initialized = false;
+// let previousFiles = [];
+// let changedFiles = [];
+// let addonData = {};
+// initialized = false;
+
+// Set up storage engine
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/'); // Save files to 'uploads/' directory
+    },
+    filename: (req, file, cb) => {
+      const dateString = moment().tz('America/New_York').format('YYYY-MM-DD_HH-mm-ss');
+      const fileExtension = path.extname(file.originalname);
+      let fileName = file.originalname;
+      if (req.body.rename_with_date === 'true') {
+        fileName = `${dateString}_${path.basename(file.originalname, fileExtension)}${fileExtension}`;
+      }
+      if (req.body.all_txt_ext === 'true') {
+        fileName = `${fileName}.txt`;
+      }
+      cb(null, fileName);
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // if (!fs.existsSync(uploadDirectory)) {
 //     console.log(`Warning: Need to create or change upload directory. ${uploadDirectory}`);
@@ -145,10 +166,10 @@ initialized = false;
 //     console.log(`Files waiting to upload: ${changedFiles}`);
 // }
 
-// async function uploadFile(filePath, uploadUrl, fileName, addonData) {
+// async function uploadFile(filePath, uploadUrl, fileName, addonData, options) {
 //     try {
 //         // Read file content asynchronously
-//         const fileBuffer = await fs.promises.readFile(filePath);
+//         const fileBuffer = await fs.readFile(filePath);
 
 //         // Create a new FormData instance
 //         const formData = new FormData();
@@ -168,10 +189,15 @@ initialized = false;
 //             fileName = `${dateString}_${path.basename(fileName, fileExtension)}${fileExtension}`;
 //         }
 //         if (options.all_txt_ext) {
-//             fileName = `${fileName}.txt`
+//             fileName = `${fileName}.txt`;
 //         }
-        
+
+//         // Append file and addonData to formData
 //         formData.append('file', fileBuffer, fileName);
+//         formData.append('addonData', JSON.stringify(addonData));
+//         formData.append('tool_key', options.tool_key);
+//         formData.append('rename_with_date', options.rename_with_date.toString());
+//         formData.append('all_txt_ext', options.all_txt_ext.toString());
 
 //         // Perform the fetch request to upload the file
 //         const response = await fetch(uploadUrl, {
@@ -190,7 +216,7 @@ initialized = false;
 //     }
 // }
 
-async function appendFileNameKey() {
+async function appendFileNameKey(addonData) {
     addonData_reorder = {
         new_filename: addonData.new_filename,
         original_filename: addonData.original_filename,
@@ -214,39 +240,29 @@ async function appendFileNameKey() {
       }
 }
 
-// POST route for handling file uploads
-app.post('/upload', (req, res) => {
-    console.log(req.body);
-    const form = new formidable.IncomingForm({
-        uploadDir: uploadDirectory,
-        keepExtensions: true,
-        keepFilenames: true,
-        filename: function (name, ext, part) {
-            // Use the original filename
-            return part.originalFilename;
-        }
 
-    })
+app.post('/upload', upload.single('file'), (req, res) => {
+    let addonData = JSON.parse(req.body.addonData);
+    const file = req.file;
 
-    form.parse(req, (err, fields, files) => {
-        if (err) {
-            console.error('Error processing upload:', err);
-            return res.status(500).send('An error occurred during the upload.');
-        }
-        
-        // addonDataStr = req.body.addonData;
-        // console.log(addonDataStr);
-        // addonData = Object.assign(addonData, JSON.parse(addonDataStr));
-        // console.log(addonData);
-        // Update addonData
-        addonData.new_filename = files.file[0].newFilename;
-        addonData.path_server = files.file[0].filepath;
-        addonData.size_bytes = files.file[0].size;
-        addonData.IP = req.ip;
-        addonData.req_headers = req.headers;
-        
-        appendFileNameKey();
-        res.status(200).send('File uploaded successfully.');
+    addonData.original_filename = file.originalname;
+    addonData.original_filepath = file.path;
+    addonData.original_fileext = path.extname(file.originalname);
+    addonData.tool = req.body.tool_key;
+    addonData.timestamp = moment().valueOf();
+    addonData.date_time = moment().tz('America/New_York').format('YYYY-MM-DD_HH-mm-ss');
+
+    addonData.new_filename = files.file[0].newFilename;
+    addonData.path_server = files.file[0].filepath;
+    addonData.size_bytes = files.file[0].size;
+    addonData.IP = req.ip;
+    addonData.req_headers = req.headers;
+
+    appendFileNameKey(addonData)
+
+    res.json({
+        message: `Successfully uploaded ${file.filename}`,
+        addonData: addonData
     });
 });
 
