@@ -43,8 +43,7 @@
                 url: 'public/fname_key.txt',
                 dataType: 'text',
                 success: function(data) {
-                    // Remove last comma
-                    data = '[' + data.slice(0, -2) + ']';
+                    data = '[' + data + ']';
                     // Parse the data into JSON
                     var jsonData = JSON.parse(data);
                     // Initialize DataTables with ColReorder
