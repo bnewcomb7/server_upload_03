@@ -46,11 +46,11 @@ let fileNameKeyPath = path.join(__dirname, 'public', 'fname_key.txt'); // Where 
 
 // User Options
 const userInputOptions = {
-    key: "test_key", 
+    key: "jhgfuesgoergb", 
     uploadInterval: 2 * 1000, 
-    rename_with_date: true,
-    upload_existing_files: true,
-    tool_key: "MLA_test",
+    rename_with_date: false,
+    upload_existing_files: false,
+    tool_key: "server",
     all_txt_ext: true
 };
 
@@ -87,135 +87,17 @@ const storage = multer.diskStorage({
       const dateString = moment().tz('America/New_York').format('YYYY-MM-DD_HH-mm-ss');
       const fileExtension = path.extname(file.originalname);
       let fileName = file.originalname;
-      if (req.body.rename_with_date === 'true') {
-        fileName = `${dateString}_${path.basename(file.originalname, fileExtension)}${fileExtension}`;
-      }
-      if (req.body.all_txt_ext === 'true') {
-        fileName = `${fileName}.txt`;
-      }
+    //   if (req.body.rename_with_date === 'true') {
+    //     fileName = `${dateString}_${path.basename(file.originalname, fileExtension)}${fileExtension}`;
+    //   }
+    //   if (req.body.all_txt_ext === 'true') {
+    //     fileName = `${fileName}.txt`;
+    //   }
       cb(null, fileName);
     }
 });
 
-const upload = multer({ storage: storage });
-
-// if (!fs.existsSync(uploadDirectory)) {
-//     console.log(`Warning: Need to create or change upload directory. ${uploadDirectory}`);
-// }
-// if (!fs.existsSync(targetDirectory)) {
-//     console.log(`Warning: Need to create or change target directory. ${targetDirectory}`);
-// }
-
-// Check for changes in the target directory
-// function checkForChanges() {
-//     fs.readdir(targetDirectory, (err, files) => {
-//         if (err) {
-//             console.error('Failed to read target directory:', err);
-//             return;
-//         }
-
-//         let currentFiles = files.map(file => {
-//             let filePath = path.join(targetDirectory, file);
-//             let stats = fs.statSync(filePath);
-//             return { name: file, mtime: stats.mtimeMs };
-//         });
-
-//         // Initialize previousFiles if empty
-//         if (!initialized && !options.upload_existing_files) {
-//             previousFiles = [...currentFiles];
-//             initialized = true;
-//             return;
-//         }
-
-//         // Determine new or updated files
-//         let updates = currentFiles.filter(file => {
-//             let prev = previousFiles.find(f => f.name === file.name);
-//             return !prev || file.mtime > prev.mtime;
-//         });
-
-//         if (updates.length > 0) {
-//             updates.forEach(file => {
-//                 if (!changedFiles.includes(file.name)) {
-//                     // Check if the file extension is allowed
-//                     const fileExtension = path.extname(file.name);
-//                     if (options.allowedExtensions.includes(fileExtension.toLowerCase())) {
-//                         changedFiles.push(file.name);
-//                     } else {
-//                         console.log(`File '${file.name}' has an invalid extension and will not be uploaded.`);
-//                     }
-//                 }
-//             });
-//             console.log('Detected new or updated files:', updates.map(f => f.name));
-//         }
-
-//         previousFiles = [...currentFiles];
-//     });
-// }
-
-// // Upload a file from changedFiles
-// function uploadFromTarget() {
-//     if (changedFiles.length === 0) {
-//         console.log('No files to upload.');
-//         return;
-//     }
-
-//     let fileName = changedFiles.shift();
-//     let sourcePath = path.join(targetDirectory, fileName);
-
-//     uploadFile(sourcePath, uploadDirectory, fileName, addonData);
-
-//     console.log(`Files waiting to upload: ${changedFiles}`);
-// }
-
-// async function uploadFile(filePath, uploadUrl, fileName, addonData, options) {
-//     try {
-//         // Read file content asynchronously
-//         const fileBuffer = await fs.readFile(filePath);
-
-//         // Create a new FormData instance
-//         const formData = new FormData();
-
-//         // Get the current time in Eastern Time (ET) using Moment.js
-//         const dateString = moment().tz('America/New_York').format('YYYY-MM-DD_HH-mm-ss');
-//         const fileExtension = path.extname(fileName);
-
-//         addonData.original_filename = fileName;
-//         addonData.original_filepath = filePath;
-//         addonData.original_fileext = fileExtension;
-//         addonData.tool = options.tool_key;
-//         addonData.timestamp = moment().valueOf();
-//         addonData.date_time = dateString;
-
-//         if (options.rename_with_date) {
-//             fileName = `${dateString}_${path.basename(fileName, fileExtension)}${fileExtension}`;
-//         }
-//         if (options.all_txt_ext) {
-//             fileName = `${fileName}.txt`;
-//         }
-
-//         // Append file and addonData to formData
-//         formData.append('file', fileBuffer, fileName);
-//         formData.append('addonData', JSON.stringify(addonData));
-//         formData.append('tool_key', options.tool_key);
-//         formData.append('rename_with_date', options.rename_with_date.toString());
-//         formData.append('all_txt_ext', options.all_txt_ext.toString());
-
-//         // Perform the fetch request to upload the file
-//         const response = await fetch(uploadUrl, {
-//             method: 'POST',
-//             body: formData, // Automatically sets 'Content-Type': 'multipart/form-data'
-//         });
-
-//         // Check the response
-//         if (!response.ok) {
-//             throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
-//         }
-
-//         console.log(`Successfully uploaded ${fileName}`);
-//     } catch (error) {
-//         console.error('Error uploading file:', error);
-//     }
-// }
+const upload = multer({ storage: storage, limits: { fileSize: 500 * 1024 * 1024 }});
 
 async function appendFileNameKey(addonData) {
     addonData_reorder = {
@@ -241,8 +123,23 @@ async function appendFileNameKey(addonData) {
       }
 }
 
+// Custom middleware to check key before uploading file
+function checkKey(req, res, next) {
+    let addonData;
+    try {
+        addonData = JSON.parse(req.body.addonData);
+    } catch (error) {
+        return res.status(400).send('Invalid JSON in addonData');
+    }
+    
+    if (addonData.key === options.key || addonData.key === "admin_key") {
+        next(); // Key matches, proceed to upload
+    } else {
+        res.status(403).send('Unauthorized Key'); // Key doesn't match, send forbidden status
+    }
+}
 
-app.post('/upload', upload.single('file'), (req, res) => {
+app.post('/upload', upload.single('file'), checkKey, (req, res) => {
     let addonData = JSON.parse(req.body.addonData);
     const file = req.file;
 
