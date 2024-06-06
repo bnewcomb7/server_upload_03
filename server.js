@@ -8,6 +8,7 @@ const path = require('path');
 const formidable = require('formidable');
 const moment = require('moment');
 const multer = require('multer');
+const bodyParser = require('body-parser')
 require('moment-timezone/builds/moment-timezone-with-data');
 
 const port = 8080;
@@ -31,6 +32,9 @@ app.get('/table', (req, res) => {
 // Parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
 
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
 // Allow CORS for all routes
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -40,7 +44,7 @@ app.use((req, res, next) => {
 });
 
 // Directories
-const uploadDirectory = '/home/mitnano/Documents/node_upload'; // Server upload directory
+const uploadDirectory = '/home/mitnano/Tool_Logs'; // Server upload directory
 // const targetDirectory = '/home/mitnano/Desktop/test_tool_logs'; // Simulated target directory
 let fileNameKeyPath = path.join(__dirname, 'public', 'fname_key.txt'); // Where to store key to file data
 
@@ -81,7 +85,7 @@ const options = initializeOptions(userInputOptions);
 // Set up storage engine
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-      cb(null, uploadDirectory); // Save files to 'uploads/' directory
+        cb(null, uploadDirectory); // Save files to 'uploads/' directory (resorted later)
     },
     filename: (req, file, cb) => {
       const dateString = moment().tz('America/New_York').format('YYYY-MM-DD_HH-mm-ss');
@@ -148,6 +152,26 @@ app.post('/upload', upload.single('file'), checkKey, (req, res) => {
     addonData.size_bytes = file.size;
     addonData.IP = req.ip;
     addonData.req_headers = req.headers;
+
+    // Check if addonData.tool is a string and a valid directory name
+    if (typeof addonData.tool === 'string' && /^[a-zA-Z0-9-_]+$/.test(addonData.tool)) {
+        // Sort file to subdir
+        const newDirectory = path.join(uploadDirectory, addonData.tool);
+
+        // Create the directory if it doesn't exist
+        if (!fs.existsSync(newDirectory)) {
+            fs.mkdirSync(newDirectory, { recursive: true });
+        }
+
+        // Define the new path of the file
+        const newPath = path.join(newDirectory, file.filename);
+
+        // Move the file to the new directory
+        fs.renameSync(file.path, newPath);
+
+        // Update addonData.path_server to the new location
+        addonData.path_server = newPath;
+    }
 
     appendFileNameKey(addonData)
 
