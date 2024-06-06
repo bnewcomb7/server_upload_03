@@ -15,15 +15,15 @@ app.use(express.json());
 const uploadDirectory = `http://10.19.0.246:${port}/upload`; // Server upload directory
 const targetDirectories = [
     '/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs_2',
-    '/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs/',
+    '/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs',
 ];
 let fileNameKeyPath = path.join(__dirname, 'public', 'fname_key.txt'); // Where to store key to file data
 
 // User Options
 const userInputOptions = {
     key: "jhgfuesgoergb",
-    uploadInterval: 5 * 1000,
-    rename_with_date: true,
+    uploadInterval: 3 * 1000,
+    rename_with_date: false,
     upload_existing_files: false,
     tool_key: "MLA_test",
     all_txt_ext: true
@@ -68,54 +68,68 @@ targetDirectories.forEach(directory => {
     }
 });
 
+// Recursively get files from a directory
+function getFilesRecursively(directory) {
+    let files = [];
+
+    fs.readdirSync(directory).forEach(file => {
+        const fullPath = path.join(directory, file);
+        const stats = fs.statSync(fullPath);
+
+        if (stats.isDirectory()) {
+            files = files.concat(getFilesRecursively(fullPath));
+        } else {
+            files.push({ name: file, path: fullPath, mtime: stats.mtimeMs });
+        }
+    });
+
+    return files;
+}
+
 // Check for changes in the target directories
 function checkForChanges() {
     targetDirectories.forEach(targetDirectory => {
-        fs.readdir(targetDirectory, (err, files) => {
-            if (err) {
-                console.error(`Failed to read target directory (${targetDirectory}):`, err);
-                return;
-            }
-
-            let currentFiles = files.map(file => {
-                let filePath = path.join(targetDirectory, file);
-                let stats = fs.statSync(filePath);
-                return { name: file, mtime: stats.mtimeMs, directory: targetDirectory };
-            });
-
-            // Initialize previousFiles if empty
-            if (!initialized && !options.upload_existing_files) {
-                previousFiles[targetDirectory] = [...currentFiles];
-
-                directories_initialized++;
-                if (!initialized && directories_initialized === targetDirectories.length) {
-                    initialized = true;
-                }
-                return;
-            }
-
-            // Determine new or updated files
-            let updates = currentFiles.filter(file => {
-                let prev = (previousFiles[targetDirectory] || []).find(f => f.name === file.name);
-                return !prev || file.mtime > prev.mtime;
-            });
-
-            if (updates.length > 0) {
-                updates.forEach(file => {
-                    if (!changedFiles.find(f => f.name === file.name && f.directory === file.directory)) {
-                        // Check if the file extension is allowed
-                        const fileExtension = path.extname(file.name);
-                        if (options.allowedExtensions.includes(fileExtension.toLowerCase())) {
-                            changedFiles.push(file);
-                        } else {
-                            console.log(`File '${file.name}' in '${file.directory}' has an invalid extension and will not be uploaded.`);
-                        }
-                    }
-                });
-                console.log('Detected new or updated files:', updates.map(f => `${f.directory}/${f.name}`));
-            }
-            previousFiles[targetDirectory] = [...currentFiles];
+        let currentFiles = getFilesRecursively(targetDirectory).map(file => {
+            return { 
+                name: file.name, 
+                path: file.path, 
+                mtime: file.mtime, 
+                directory: path.dirname(file.path).replace(targetDirectory, '') 
+            };
         });
+
+        // Initialize previousFiles if empty
+        if (!initialized && !options.upload_existing_files) {
+            previousFiles[targetDirectory] = [...currentFiles];
+
+            directories_initialized++;
+            if (!initialized && directories_initialized === targetDirectories.length) {
+                initialized = true;
+            }
+            return;
+        }
+
+        // Determine new or updated files
+        let updates = currentFiles.filter(file => {
+            let prev = (previousFiles[targetDirectory] || []).find(f => f.path === file.path);
+            return !prev || file.mtime > prev.mtime;
+        });
+
+        if (updates.length > 0) {
+            updates.forEach(file => {
+                if (!changedFiles.find(f => f.path === file.path)) {
+                    // Check if the file extension is allowed
+                    const fileExtension = path.extname(file.name);
+                    if (options.allowedExtensions.includes(fileExtension.toLowerCase())) {
+                        changedFiles.push(file);
+                    } else {
+                        console.log(`File '${file.name}' in '${file.directory}' has an invalid extension and will not be uploaded.`);
+                    }
+                }
+            });
+            console.log('Detected new or updated files:', updates.map(f => `${f.directory}/${f.name}`));
+        }
+        previousFiles[targetDirectory] = [...currentFiles];
     });
 }
 
@@ -127,14 +141,14 @@ function uploadFromTarget() {
     }
 
     let file = changedFiles.shift();
-    let sourcePath = path.join(file.directory, file.name);
+    let sourcePath = file.path;
 
-    uploadFile(sourcePath, uploadDirectory, file.name, addonData);
+    uploadFile(sourcePath, uploadDirectory, file, addonData);
 
     console.log(`Files waiting to upload: ${changedFiles.map(f => `${f.directory}/${f.name}`)}`);
 }
 
-async function uploadFile(filePath, uploadUrl, fileName, addonData) {
+async function uploadFile(filePath, uploadUrl, file, addonData) {
     try {
         // Read file content asynchronously
         const fileBuffer = await fs.promises.readFile(filePath);
@@ -144,9 +158,9 @@ async function uploadFile(filePath, uploadUrl, fileName, addonData) {
 
         // Get the current time in Eastern Time (ET) using Moment.js
         const dateString = moment().tz('America/New_York').format('YYYY-MM-DD_HH-mm-ss');
-        const fileExtension = path.extname(fileName);
+        const fileExtension = path.extname(file.name);
 
-        addonData.original_filename = fileName;
+        addonData.original_filename = file.name;
         addonData.original_filepath = filePath;
         addonData.original_fileext = fileExtension;
         addonData.tool = options.tool_key;
@@ -154,15 +168,19 @@ async function uploadFile(filePath, uploadUrl, fileName, addonData) {
         addonData.date_time = dateString;
         addonData.key = options.key;
 
+        // Include subdirectory structure in file name
+        let subDirPath = file.directory.split(path.sep).filter(part => part).join('-');
+        let newFileName = subDirPath ? `${subDirPath}-${file.name}` : file.name;
+
         if (options.rename_with_date) {
-            fileName = `${dateString}_${path.basename(fileName, fileExtension)}${fileExtension}`;
+            newFileName = `${dateString}_${path.basename(newFileName, fileExtension)}${fileExtension}`;
         }
         if (options.all_txt_ext) {
-            fileName = `${fileName}.txt`;
+            newFileName = `${newFileName}.txt`;
         }
 
         // Append file and addonData to formData
-        formData.append('file', fileBuffer, fileName);
+        formData.append('file', fileBuffer, newFileName);
         formData.append('addonData', JSON.stringify(addonData));
         formData.append('tool_key', options.tool_key);
         formData.append('rename_with_date', options.rename_with_date.toString());
@@ -179,7 +197,7 @@ async function uploadFile(filePath, uploadUrl, fileName, addonData) {
             throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
         }
 
-        console.log(`Successfully uploaded ${fileName}`);
+        console.log(`Successfully uploaded ${newFileName}`);
     } catch (error) {
         console.error('Error uploading file:', error);
     }
@@ -199,7 +217,7 @@ app.listen(port, () => {
     setInterval(checkForChanges, options.checkInterval);
     setInterval(uploadFromTarget, options.uploadInterval);
 
-    console.log(`Server running at http://10.19.0.246:${port}`);
+    console.log(`Server running at http://10.19.0.246:${port}\n`);
     console.log('Monitoring files saved to the following directories:');
     targetDirectories.forEach(directory => console.log(directory));
 });
