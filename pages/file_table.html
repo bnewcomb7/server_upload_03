@@ -8,6 +8,14 @@
     <link href="https://cdn.datatables.net/v/dt/dt-2.0.5/datatables.min.css" rel="stylesheet">
     <!-- Include ColReorder CSS -->
     <link href="https://cdn.datatables.net/colreorder/2.0.1/css/colReorder.foundation.min.css" rel="stylesheet">
+    <style>
+        /* Style to remove default hyperlink styling */
+        .normal-link {
+            color: inherit; /* Inherit text color */
+            text-decoration: none; /* Remove underline */
+            cursor: pointer; /* Show pointer cursor on hover */
+        }
+    </style>
 </head>
 <body>
     <table id="dataTable" class="display">
@@ -47,7 +55,7 @@
                     // Parse the data into JSON
                     var jsonData = JSON.parse(data);
                     // Initialize DataTables with ColReorder
-                    $('#dataTable').DataTable({
+                    var table = $('#dataTable').DataTable({
                         data: jsonData,
                         columns: [
                             { data: 'new_filename' },
@@ -55,7 +63,15 @@
                             { data: 'tool' },
                             { data: 'date_time' },
                             { data: 'size_bytes' },
-                            { data: 'path_server' },
+                            { 
+                                data: 'path_server',
+                                render: function(data, type, row, meta) {
+                                    // Extract the relevant part of the path
+                                    var relevantPath = data.split('/').slice(4).join('/');
+                                    // Render as normal text with onclick to open in new tab
+                                    return '<span class="normal-link" onclick="window.open(\'http://10.19.0.246:8080/explorer/' + encodeURIComponent(relevantPath) + '\', \'_blank\')">' + relevantPath + '</span>';
+                                }
+                            },
                             { data: 'original_filepath' },
                             { data: 'original_fileext' },
                             { data: 'timestamp' },
