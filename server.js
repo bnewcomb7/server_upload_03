@@ -1,6 +1,7 @@
 const express = require('express');
 const serveIndex = require('serve-index');
 const http = require('http');
+const basicAuth = require('basic-auth');
 const fs = require('fs');
 const fetch = require('node-fetch');
 const FormData = require('form-data');
@@ -14,12 +15,6 @@ require('moment-timezone/builds/moment-timezone-with-data');
 const port = 8080;
 const app = express();
 app.use(express.json())
-
-app.use('/public', express.static('public'));
-app.use('/public', serveIndex('public'));
-
-// app.use('/upload', express.static('upload')); // Serve files from the upload directory
-// app.use('/upload', serveIndex('upload'));
 
 app.get('/index', (req, res) => {
     res.sendFile(path.join(__dirname, 'pages', 'index.html'));
@@ -47,6 +42,28 @@ app.use((req, res, next) => {
 const uploadDirectory = '/home/mitnano/Tool_Logs'; // Server upload directory
 // const targetDirectory = '/home/mitnano/Desktop/test_tool_logs'; // Simulated target directory
 let fileNameKeyPath = path.join(__dirname, 'public', 'fname_key.txt'); // Where to store key to file data
+//app.use('/explorer', express.static(uploadDirectory), serveIndex(uploadDirectory, { 'icons': true }));
+
+// Define your username and password
+const USERNAME = 'mit.nano';
+const PASSWORD = 'key.nano';
+
+// Custom middleware to check username and password
+const auth = (req, res, next) => {
+    const credentials = basicAuth(req);
+
+    // Check if credentials are valid
+    if (!credentials || credentials.name !== USERNAME || credentials.pass !== PASSWORD) {
+        res.set('WWW-Authenticate', 'Basic realm="Authorization Required"');
+        return res.sendStatus(401);
+    }
+    // If credentials are correct, proceed
+    next();
+};
+
+// Apply auth middleware to the /explorer and /public routes
+app.use('/public', auth, express.static('public'), serveIndex('public', { 'icons': true }));
+app.use('/explorer', auth, express.static(uploadDirectory), serveIndex(uploadDirectory, { 'icons': true }));
 
 // User Options
 const userInputOptions = {
@@ -136,7 +153,7 @@ function checkKey(req, res, next) {
         return res.status(400).send('Invalid JSON in addonData');
     }
     
-    if (addonData.key === options.key || addonData.key === "admin_key") {
+    if (addonData.key === options.key || addonData.key === "admin_key" || addonData.key === "key.nano") {
         next(); // Key matches, proceed to upload
     } else {
         res.status(403).send('Unauthorized Key'); // Key doesn't match, send forbidden status
@@ -180,9 +197,18 @@ app.post('/upload', upload.single('file'), checkKey, (req, res) => {
         addonData: addonData
     });
 });
+// GET route for redirecting main page to index
+app.get('/', (req, res) => {
+    res.redirect('/index');
+});
+
+// GET route for serving index.html
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(__dirname, 'pages', 'index.html'));
+});
 
 // GET route for displaying uploaded files
-app.get('/', (req, res) => {
+app.get('/files', (req, res) => {
     fs.readdir(uploadDirectory, (err, files) => {
         if (err) {
             console.error('Failed to list upload directory:', err);
