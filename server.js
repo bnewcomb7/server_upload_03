@@ -20,10 +20,6 @@ app.get('/index', (req, res) => {
     res.sendFile(path.join(__dirname, 'pages', 'index.html'));
 });
 
-app.get('/table', (req, res) => {
-    res.sendFile(path.join(__dirname, 'pages', 'file_table.html'));
-});
-
 // Parse URL-encoded bodies
 app.use(express.urlencoded({ extended: true }));
 
@@ -64,6 +60,9 @@ const auth = (req, res, next) => {
 // Apply auth middleware to the /explorer and /public routes
 app.use('/public', auth, express.static('public'), serveIndex('public', { 'icons': true }));
 app.use('/explorer', auth, express.static(uploadDirectory), serveIndex(uploadDirectory, { 'icons': true }));
+app.get('/table', auth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'pages', 'file_table.html'));
+});
 
 // User Options
 const userInputOptions = {
