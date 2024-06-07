@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>File Upload</title>
+    <!-- Include DataTables CSS -->
+    <link href="https://cdn.datatables.net/v/dt/dt-2.0.5/datatables.min.css" rel="stylesheet">
+    <!-- Include ColReorder CSS -->
+    <link href="https://cdn.datatables.net/colreorder/2.0.1/css/colReorder.foundation.min.css" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -43,16 +47,82 @@
         .button:hover {
             background-color: #0056b3;
         }
+
+        /* Style to remove default hyperlink styling */
+        .normal-link {
+            color: inherit; /* Inherit text color */
+            text-decoration: none; /* Remove underline */
+            cursor: pointer; /* Show pointer cursor on hover */
+        }
     </style>
+</head>
 </head>
 <body>
     <div class="container">
         <h1>Welcome to Server File Upload</h1>
-        <p>This project allows you to automate file uploads to a server using Node JS. The details of uploaded files 
+        <p>This project allows automated file uploads to a server using Node JS. The details of uploaded files 
           are organized in a table.
         </p>
         <p>Click below to view the file table:</p>
-        <a href="/table" class="button">View File Table</a>
+        <a href="/table" class="button">View Full File Table</a>
+        <a href="/explorer" class="button">View File Explorer</a>
+        <h2>Recent Files:</h2>
+
+    <table id="dataTable" class="display">
+        <thead>
+            <tr>
+                <th>Original Filename</th>
+                <th>Tool</th>
+                <th>Date and Time</th>
+                <th>Size (bytes)</th>
+                <th>Path on Server</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <!-- Include DataTables JS -->
+    <script src="https://cdn.datatables.net/2.0.5/js/dataTables.js"></script>
+    <!-- Include ColReorder JS -->
+    <script src="https://cdn.datatables.net/colreorder/2.0.1/js/ColReorder.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Read the text file
+            $.ajax({
+                url: 'public/fname_key.txt',
+                dataType: 'text',
+                success: function(data) {
+                    data = '[' + data + ']';
+                    // Parse the data into JSON
+                    var jsonData = JSON.parse(data);
+                    // Initialize DataTables with ColReorder
+                    var table = $('#dataTable').DataTable({
+                        data: jsonData,
+                        columns: [
+                            { data: 'original_filename' },
+                            { data: 'tool' },
+                            { data: 'date_time' },
+                            { data: 'size_bytes' },
+                            { 
+                                data: 'path_server',
+                                render: function(data, type, row, meta) {
+                                    // Extract the relevant part of the path
+                                    var relevantPath = data.split('/').slice(4).join('/');
+                                    // Render as normal text with onclick to open in new tab
+                                    return '<span class="normal-link" onclick="window.open(\'http://10.19.0.246:8080/explorer/' + encodeURIComponent(relevantPath) + '\', \'_blank\')">' + relevantPath + '</span>';
+                                }
+                            },
+                        ],
+                        colReorder: true, // Enable ColReorder
+                        order: [[2, 'desc']]
+                    });
+                }
+            });
+        });
+    </script>
     </div>
 </body>
 </html>
