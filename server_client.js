@@ -14,18 +14,17 @@ app.use(express.json());
 // Directories
 const uploadDirectory = `http://10.19.0.246:${port}/upload`; // Server upload directory
 const targetDirectories = [
-    '/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs_2',
-    '/Users/benjaminnewcomb/Desktop/MIT.nano/Projects/test_tool_logs',
+    path.join('C:', 'Users', 'bnewcomb', 'Desktop', 'tool_log_test')
 ];
-let fileNameKeyPath = path.join(__dirname, 'public', 'fname_key.txt'); // Where to store key to file data
 
 // User Options
 const userInputOptions = {
     key: "jhgfuesgoergb",
+    checkInterval: 1 * 1000,
     uploadInterval: 3 * 1000,
     rename_with_date: false,
-    upload_existing_files: false,
-    tool_key: "MLA_test",
+    upload_existing_files: true,
+    tool_key: "Windows_Laptop",
     all_txt_ext: true
 };
 
@@ -33,8 +32,8 @@ const userInputOptions = {
 function initializeOptions(userOptions) {
     const defaultOptions = {
         key: "jhgfuesgoergb",
-        checkInterval: 1 * 1000, // Check every 1 seconds
-        uploadInterval: 3 * 1000, // Upload every 3 seconds
+        checkInterval: 60 * 1000, // Check every 60 seconds
+        uploadInterval: 24 * 60 * 60 * 1000, // Upload every 24 hours
         rename_with_date: false, // Add datetime to file name in uploads folder
         upload_existing_files: false, // Save files already in targetDirectory on start
         allowedExtensions: ['.txt', '.log', '.csv', '.xls', '.pdf', '.doc', '.docx', '.jpg', '.png'], // Only save files with these extensions
@@ -140,12 +139,15 @@ function uploadFromTarget() {
         return;
     }
 
-    let file = changedFiles.shift();
-    let sourcePath = file.path;
+    while (changedFiles.length > 0) {
+        let file = changedFiles.shift();
+        let sourcePath = file.path;
 
-    uploadFile(sourcePath, uploadDirectory, file, addonData);
+        uploadFile(sourcePath, uploadDirectory, file, addonData);
+        console.log(`Files waiting to upload: ${changedFiles.map(f => `${f.directory}/${f.name}`)}`);
+    }
 
-    console.log(`Files waiting to upload: ${changedFiles.map(f => `${f.directory}/${f.name}`)}`);
+    console.log('All changed files have been processed for upload.');
 }
 
 async function uploadFile(filePath, uploadUrl, file, addonData) {
