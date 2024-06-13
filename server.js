@@ -36,9 +36,7 @@ app.use((req, res, next) => {
 
 // Directories
 const uploadDirectory = '/home/mitnano/Tool_Logs'; // Server upload directory
-// const targetDirectory = '/home/mitnano/Desktop/test_tool_logs'; // Simulated target directory
 let fileNameKeyPath = path.join(__dirname, 'public', 'fname_key.txt'); // Where to store key to file data
-//app.use('/explorer', express.static(uploadDirectory), serveIndex(uploadDirectory, { 'icons': true }));
 
 // Define your username and password
 const USERNAME = 'mit.nano';
@@ -78,8 +76,6 @@ const userInputOptions = {
 function initializeOptions(userOptions) {
     const defaultOptions = {
         key: "jhgfuesgoergb",
-        checkInterval: 0.5 * 1000, // Check every 0.5 seconds
-        uploadInterval: 3 * 1000, // Upload every 3 seconds
         rename_with_date: false, // Add datetime to file name in uploads folder
         upload_existing_files: false, // Save files already in targetDirectory on start
         allowedExtensions: ['.txt', '.log', '.csv', '.xls', '.pdf', '.doc', '.docx', '.jpg', '.png'], // Only save files with these extensions
